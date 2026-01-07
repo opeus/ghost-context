@@ -21,9 +21,17 @@ interface Tag {
   slug: string;
 }
 
+interface Blog {
+  index: number;
+  name: string;
+  url: string;
+}
+
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [selectedBlog, setSelectedBlog] = useState<number>(0);
   const [posts, setPosts] = useState<Post[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
@@ -39,16 +47,34 @@ export default function Home() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      loadData();
+      loadBlogs();
     }
   }, [status]);
 
+  useEffect(() => {
+    if (blogs.length > 0) {
+      loadData();
+    }
+  }, [selectedBlog, blogs]);
+
+  const loadBlogs = async () => {
+    try {
+      const response = await fetch('/api/posts?type=blogs');
+      const data = await response.json();
+      setBlogs(data.blogs || []);
+    } catch (error) {
+      console.error('Failed to load blogs:', error);
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
+    setSelectedPosts(new Set());
+    setFilterTag('');
     try {
       const [postsRes, tagsRes] = await Promise.all([
-        fetch('/api/posts'),
-        fetch('/api/posts?type=tags'),
+        fetch(`/api/posts?blogIndex=${selectedBlog}`),
+        fetch(`/api/posts?type=tags&blogIndex=${selectedBlog}`),
       ]);
       const postsData = await postsRes.json();
       const tagsData = await tagsRes.json();
@@ -95,7 +121,7 @@ export default function Home() {
       const response = await fetch('/api/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postIds: Array.from(selectedPosts) }),
+        body: JSON.stringify({ postIds: Array.from(selectedPosts), blogIndex: selectedBlog }),
       });
 
       const data = await response.json();
@@ -148,6 +174,25 @@ export default function Home() {
 
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Filter & Selection</h2>
+
+          {blogs.length > 1 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Select Blog
+              </label>
+              <select
+                value={selectedBlog}
+                onChange={(e) => setSelectedBlog(parseInt(e.target.value))}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {blogs.map((blog) => (
+                  <option key={blog.index} value={blog.index}>
+                    {blog.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">

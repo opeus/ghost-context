@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { fetchPostById } from '@/lib/ghost';
+import { fetchPostById, getBlogs } from '@/lib/ghost';
 
 export async function POST(request: Request) {
   try {
-    const { postIds } = await request.json();
+    const { postIds, blogIndex } = await request.json();
 
     if (!postIds || !Array.isArray(postIds)) {
       return NextResponse.json(
@@ -12,9 +12,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const blogs = getBlogs();
+    const blog = blogs[blogIndex || 0];
+    if (!blog) {
+      return NextResponse.json(
+        { error: 'Invalid blog index' },
+        { status: 400 }
+      );
+    }
+
     // Fetch all selected posts
     const posts = await Promise.all(
-      postIds.map((id) => fetchPostById(id))
+      postIds.map((id) => fetchPostById(id, blog))
     );
 
     // Format posts as AI context

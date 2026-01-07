@@ -1,7 +1,21 @@
 import axios from 'axios';
 
-const GHOST_API_URL = process.env.GHOST_API_URL;
-const GHOST_CONTENT_API_KEY = process.env.GHOST_CONTENT_API_KEY;
+export interface GhostBlog {
+  name: string;
+  url: string;
+  contentKey: string;
+  adminKey: string;
+}
+
+export function getBlogs(): GhostBlog[] {
+  try {
+    const blogsJson = process.env.GHOST_BLOGS || '[]';
+    return JSON.parse(blogsJson);
+  } catch (error) {
+    console.error('Error parsing GHOST_BLOGS:', error);
+    return [];
+  }
+}
 
 export interface GhostPost {
   id: string;
@@ -18,13 +32,13 @@ export interface GhostPost {
   authors?: Array<{ name: string }>;
 }
 
-export async function fetchAllPosts(): Promise<GhostPost[]> {
+export async function fetchAllPosts(blog: GhostBlog): Promise<GhostPost[]> {
   try {
     const response = await axios.get(
-      `${GHOST_API_URL}/ghost/api/content/posts/`,
+      `${blog.url}/ghost/api/content/posts/`,
       {
         params: {
-          key: GHOST_CONTENT_API_KEY,
+          key: blog.contentKey,
           limit: 'all',
           fields: 'id,title,slug,url,excerpt,feature_image,published_at,updated_at',
           include: 'tags,authors',
@@ -38,13 +52,13 @@ export async function fetchAllPosts(): Promise<GhostPost[]> {
   }
 }
 
-export async function fetchPostById(id: string): Promise<GhostPost> {
+export async function fetchPostById(id: string, blog: GhostBlog): Promise<GhostPost> {
   try {
     const response = await axios.get(
-      `${GHOST_API_URL}/ghost/api/content/posts/${id}/`,
+      `${blog.url}/ghost/api/content/posts/${id}/`,
       {
         params: {
-          key: GHOST_CONTENT_API_KEY,
+          key: blog.contentKey,
           fields: 'id,title,slug,url,html,plaintext,excerpt,feature_image,published_at,updated_at',
           include: 'tags,authors',
         },
@@ -57,13 +71,13 @@ export async function fetchPostById(id: string): Promise<GhostPost> {
   }
 }
 
-export async function fetchPostsByTag(tagSlug: string): Promise<GhostPost[]> {
+export async function fetchPostsByTag(tagSlug: string, blog: GhostBlog): Promise<GhostPost[]> {
   try {
     const response = await axios.get(
-      `${GHOST_API_URL}/ghost/api/content/posts/`,
+      `${blog.url}/ghost/api/content/posts/`,
       {
         params: {
-          key: GHOST_CONTENT_API_KEY,
+          key: blog.contentKey,
           filter: `tag:${tagSlug}`,
           limit: 'all',
           fields: 'id,title,slug,url,excerpt,feature_image,published_at,updated_at',
@@ -78,13 +92,13 @@ export async function fetchPostsByTag(tagSlug: string): Promise<GhostPost[]> {
   }
 }
 
-export async function fetchAllTags() {
+export async function fetchAllTags(blog: GhostBlog) {
   try {
     const response = await axios.get(
-      `${GHOST_API_URL}/ghost/api/content/tags/`,
+      `${blog.url}/ghost/api/content/tags/`,
       {
         params: {
-          key: GHOST_CONTENT_API_KEY,
+          key: blog.contentKey,
           limit: 'all',
           fields: 'id,name,slug',
         },
