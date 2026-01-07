@@ -8,6 +8,9 @@ interface Post {
   id: string;
   title: string;
   slug: string;
+  url: string;
+  excerpt?: string;
+  feature_image?: string;
   published_at: string;
   tags?: Array<{ name: string; slug: string }>;
 }
@@ -191,7 +194,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold mb-4">
             Posts ({filteredPosts.length})
           </h2>
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="space-y-3 max-h-[600px] overflow-y-auto">
             {filteredPosts.map((post) => (
               <div
                 key={post.id}
@@ -202,12 +205,35 @@ export default function Home() {
                     : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-medium">{post.title}</h3>
-                    <p className="text-sm text-gray-400 mt-1">
-                      {new Date(post.published_at).toLocaleDateString()}
-                    </p>
+                <div className="flex gap-4">
+                  {post.feature_image && (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={post.feature_image}
+                        alt={post.title}
+                        className="w-32 h-24 object-cover rounded"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-lg">{post.title}</h3>
+                    {post.excerpt && (
+                      <p className="text-sm text-gray-300 mt-1 line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-3 mt-2 text-sm text-gray-400">
+                      <span>{new Date(post.published_at).toLocaleDateString()}</span>
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-blue-300 hover:text-blue-200 hover:underline"
+                      >
+                        View →
+                      </a>
+                    </div>
                     {post.tags && post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
                         {post.tags.map((tag) => (
@@ -225,7 +251,7 @@ export default function Home() {
                     type="checkbox"
                     checked={selectedPosts.has(post.id)}
                     onChange={() => {}}
-                    className="ml-4 w-5 h-5"
+                    className="ml-4 w-5 h-5 flex-shrink-0 mt-1"
                   />
                 </div>
               </div>

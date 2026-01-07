@@ -25,6 +25,7 @@ export async function POST(request: Request) {
 
     posts.forEach((post, index) => {
       contextContent += `## Article ${index + 1}: ${post.title}\n\n`;
+      contextContent += `**URL:** ${post.url}\n`;
       contextContent += `**Slug:** ${post.slug}\n`;
       contextContent += `**Published:** ${post.published_at}\n`;
 
@@ -34,6 +35,10 @@ export async function POST(request: Request) {
 
       if (post.authors && post.authors.length > 0) {
         contextContent += `**Authors:** ${post.authors.map(a => a.name).join(', ')}\n`;
+      }
+
+      if (post.excerpt) {
+        contextContent += `**Excerpt:** ${post.excerpt}\n`;
       }
 
       contextContent += '\n### Content\n\n';

@@ -7,8 +7,11 @@ export interface GhostPost {
   id: string;
   title: string;
   slug: string;
+  url: string;
   html?: string;
   plaintext?: string;
+  excerpt?: string;
+  feature_image?: string;
   published_at: string;
   updated_at: string;
   tags?: Array<{ name: string; slug: string }>;
@@ -23,7 +26,7 @@ export async function fetchAllPosts(): Promise<GhostPost[]> {
         params: {
           key: GHOST_CONTENT_API_KEY,
           limit: 'all',
-          fields: 'id,title,slug,published_at,updated_at',
+          fields: 'id,title,slug,url,excerpt,feature_image,published_at,updated_at',
           include: 'tags,authors',
         },
       }
@@ -42,7 +45,7 @@ export async function fetchPostById(id: string): Promise<GhostPost> {
       {
         params: {
           key: GHOST_CONTENT_API_KEY,
-          fields: 'id,title,slug,html,plaintext,published_at,updated_at',
+          fields: 'id,title,slug,url,html,plaintext,excerpt,feature_image,published_at,updated_at',
           include: 'tags,authors',
         },
       }
@@ -63,7 +66,7 @@ export async function fetchPostsByTag(tagSlug: string): Promise<GhostPost[]> {
           key: GHOST_CONTENT_API_KEY,
           filter: `tag:${tagSlug}`,
           limit: 'all',
-          fields: 'id,title,slug,published_at,updated_at',
+          fields: 'id,title,slug,url,excerpt,feature_image,published_at,updated_at',
           include: 'tags,authors',
         },
       }
