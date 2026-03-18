@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs_24", "npm-9_x"]
+
+[phases.install]
+cmds = ["npm i"]
+
+[phases.build]
+cmds = ["npm install && npm run build"]
+
+[start]
+cmd = "npm start"
+
+[phases.build.caches]
+npm = "/root/.npm"
+node_modules_cache = "/app/node_modules/.cache"
+next_cache = "/app/.next/cache"
